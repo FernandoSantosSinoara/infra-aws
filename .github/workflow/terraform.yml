@@ -1,0 +1,129 @@
+# ==============================================================================
+# PIPELINE CI/CD DO TERRAFORM VIA GITHUB ACTIONS
+# ==============================================================================
+# Define o nome amigável do fluxo de trabalho na interface do GitHub Actions
+name: "Terraform CI/CD - SENAC"
+
+# Bloco 'on': Determina quais eventos de gatilho disparam a execução desta pipeline
+on:
+  # Gatilho disparado quando um Pull Request é aberto ou atualizado com destino à branch 'main'
+  pull_request:
+    # Monitora exclusivamente a branch principal 'main'
+    branches: [ "main" ]
+    # Filtra para executar somente se houver modificações nestes diretórios específicos
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/**'
+
+  # Gatilho disparado quando um commit/merge chega na branch 'main'
+  push:
+    # Monitora diretamente commits aplicados na branch 'main'
+    branches: [ "main" ]
+    # Garante que só executa se alterações nos arquivos de infraestrutura foram enviadas
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/**'
+
+  # Gatilho manual: Permite que um desenvolvedor acione a pipeline pelo botão da interface web
+  workflow_dispatch:
+    # Declara entradas customizadas que o operador deve preencher antes de rodar
+    inputs:
+      # Nome do campo de seleção
+      action:
+        # Texto exibido na interface gráfica do GitHub
+        description: '## Acao do Terraform (Escolha entre aplicar ou destruir a infraestrutura)'
+        # Torna o preenchimento deste campo obrigatório
+        required: true
+        # Define 'apply' como a escolha pré-selecionada por padrão
+        default: 'apply'
+        # Tipo do campo como lista de seleção única
+        type: choice
+        # As opções possíveis que o usuário pode escolher
+        options:
+        - apply
+        - destroy
+
+# Bloco de permissões para integração segura com a AWS via OIDC (caso utilize IAM Roles)
+permissions:
+  # Permite que o runner do GitHub emita tokens de identidade OpenID Connect
+  id-token: write
+  # Permite a leitura do conteúdo do repositório no momento do checkout
+  contents: read
+
+# Bloco de jobs: Onde a automação real é configurada e dividida em passos lógicos
+jobs:
+  # Identificador do job de execução do Terraform
+  terraform:
+    # Nome descritivo exibido na tela de monitoramento do GitHub Actions
+    name: "Terraform"
+    # Máquina virtual descartável fornecida pela nuvem do GitHub (Ubuntu Linux)
+    runs-on: ubuntu-latest
+    # Configurações padrão que afetam todos os comandos executados no job
+    defaults:
+      # Define que todos os blocos 'run' serão executados dentro do diretório ./terraform
+      run:
+        working-directory: ./terraform
+
+    # Lista sequencial de passos a serem executados na máquina virtual
+    steps:
+    # 1. Faz o clone do código do repositório para o runner
+    - name: Checkout do código
+      # Utiliza a action oficial do GitHub para clonar o repositório
+      uses: actions/checkout@v4
+
+    # 2. Faz o download e instala o binário do Terraform na máquina virtual
+    - name: Setup Terraform
+      # Utiliza a action oficial da HashiCorp para provisionar o CLI
+      uses: hashicorp/setup-terraform@v3
+      # Parâmetros de configuração da ferramenta
+      with:
+        # Versão estrita e estável do Terraform a ser instalada
+        terraform_version: 1.10.0
+
+    # 3. Autentica o GitHub Actions na conta AWS usando chaves ou OIDC
+    - name: Autenticar na AWS
+      # Utiliza a action oficial da AWS para carregar credenciais de ambiente
+      uses: aws-actions/configure-aws-credentials@v4
+      # Variáveis necessárias para a autenticação
+      with:
+        # [access-key] Chave de acesso cadastrada nas Secrets do GitHub (AWS_ACCESS_KEY_ID)
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        # [secret-access-key] Chave secreta cadastrada nas Secrets do GitHub (AWS_SECRET_ACCESS_KEY)
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # Região AWS padrão onde a infraestrutura será provisionada
+        aws-region: us-east-2
+
+    # 4. Inicializa o Terraform baixando os provedores (AWS) e conectando ao Backend remoto S3
+    - name: Terraform Init
+      # Executa a inicialização dos módulos e plugins
+      run: terraform init
+
+    # 5. Verifica formatação correta de código HCL e valida a sintaxe dos blocos
+    - name: Terraform Format & Validate
+      # Roda comandos de validação estática
+      run: |
+        # Checa e formata o espaçamento do código HCL
+        terraform fmt -check
+        # Valida internamente se a sintaxe de todos os arquivos .tf está consistente
+        terraform validate
+
+    # 6. Gera o plano de execução para inspecionar o que será criado/alterado (Apenas em PRs)
+    - name: Terraform Plan
+      # Condicional: Executa este step exclusivamente se o evento disparador for um Pull Request
+      if: github.event_name == 'pull_request'
+      # Executa o planejamento sem cores ANSI para facilitar leitura nos logs da web
+      run: terraform plan -no-color
+
+    # 7. Aplica as mudanças de infraestrutura na AWS (No push para main ou dispatch manual com apply)
+    - name: Terraform Apply
+      # Condicional: Executa se houve merge/push na main OU se disparado manualmente com 'apply'
+      if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+      # Aplica a infraestrutura aprovando automaticamente os prompts de confirmação
+      run: terraform apply -auto-approve
+
+    # 8. Destrói toda a infraestrutura da AWS se acionado explicitamente para limpeza do laboratório
+    - name: Terraform Destroy
+      # Condicional: Executa SOMENTE se acionado via workflow manual com a opção 'destroy'
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+      # Destrói todos os recursos provisionados para evitar custos indesejados
+      run: terraform destroy -auto-approve
