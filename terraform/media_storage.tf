@@ -90,16 +90,23 @@ resource "aws_iam_role_policy" "animal_media" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:AbortMultipartUpload",
-        "s3:ListMultipartUploadParts",
-      ]
-      Resource = "${aws_s3_bucket.animal_media.arn}/*"
-    }]
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = aws_s3_bucket.animal_media.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListMultipartUploadParts",
+        ]
+        Resource = "${aws_s3_bucket.animal_media.arn}/animais/*"
+      },
+    ]
   })
 }
 
