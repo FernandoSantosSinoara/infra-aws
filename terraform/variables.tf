@@ -21,18 +21,18 @@ variable "cluster_name" {
   description = "Nome do Cluster Amazon EKS"
 }
 
-# Porta NodePort exposta nos nós EC2 e usada como destino do ALB
+# NodePort do frontend Nginx exposto nos nós EC2 e usado como destino do ALB
 variable "app_node_port" {
   type        = number
   default     = 30080
-  description = "NodePort (30000-32767) do Service Kubernetes da aplicação, alvo do ALB"
+  description = "NodePort (30000-32767) do Service Kubernetes do frontend Nginx, alvo do ALB"
 }
 
 # Caminho usado pelo health check do Target Group
 variable "app_health_check_path" {
   type        = string
-  default     = "/actuator/health"
-  description = "Caminho HTTP verificado pelo ALB (Spring Boot Actuator, o mesmo usado nas probes do Kubernetes)"
+  default     = "/"
+  description = "Caminho HTTP verificado pelo ALB para validar o frontend Nginx"
 }
 
 # Identificador da instância RDS

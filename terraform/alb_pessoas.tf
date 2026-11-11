@@ -1,6 +1,6 @@
 # ==============================================================================
 # APPLICATION LOAD BALANCER PARA AS APLICACOES DO NODE GROUP "ng-senac-app"
-# Listener 80 -> aplicacao principal
+# Listener 80 -> frontend estatico Nginx (NodePort 30080)
 # Listener 8081 -> pessoas-service
 # ==============================================================================
 
@@ -92,7 +92,7 @@ resource "aws_lb" "app" {
   }
 }
 
-# Target Group da aplicacao principal
+# Target Group do frontend estatico servido pelo Nginx
 resource "aws_lb_target_group" "app" {
   name        = "tg-senac-app"
   port        = var.app_node_port
@@ -121,7 +121,7 @@ resource "aws_lb_target_group" "pessoas" {
   vpc_id      = module.vpc.vpc_id
 
   health_check {
-    path                = "/actuator/health"
+    path                = "/healthz/ready/"
     port                = "traffic-port"
     protocol            = "HTTP"
     matcher             = "200-399"
@@ -132,7 +132,7 @@ resource "aws_lb_target_group" "pessoas" {
   }
 }
 
-# Listener HTTP 80 encaminhando para a aplicacao principal
+# Listener HTTP 80 encaminhando para o frontend estatico
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = local.app_alb_port
@@ -174,7 +174,7 @@ output "alb_dns_name" {
 }
 
 output "alb_url" {
-  description = "URL HTTP da aplicacao principal via ALB"
+  description = "URL HTTP do frontend estatico via ALB"
   value       = "http://${aws_lb.app.dns_name}"
 }
 
