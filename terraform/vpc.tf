@@ -9,7 +9,7 @@ module "vpc" {
   version = "~> 5.5"
 
   # Nome atribuído à Virtual Private Cloud (VPC)
-  name = "vpc-senac-aws"
+  name = "vpc-best-buddy-aws"
   # Bloco de endereçamento IPv4 privado principal (permite até 65.536 endereços IPs internos)
   cidr = "10.0.0.0/16"
 

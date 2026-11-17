@@ -28,7 +28,7 @@ terraform {
   # O Backend remoto garante que o time compartilhe o mesmo estado sem sobrescrever alterações
   backend "s3" {
     # [id-conta] Nome do bucket S3 criado previamente na AWS para persistência do estado
-    bucket = "tfstate-senac-aws-188785237347"
+    bucket = "tfstate-best-buddy-aws-306180879419"
     # Caminho/chave dentro do bucket onde o arquivo .tfstate ficará guardado
     key = "infra/terraform.tfstate"
     # Região onde o bucket S3 de estado foi provisionado
@@ -49,7 +49,7 @@ provider "aws" {
   default_tags {
     tags = {
       # Identificador do projeto de treinamento/laboratório
-      Project = "App-Senac-AWS"
+      Project = "App-Best-Buddy-AWS"
       # Ambiente de execução da aplicação
       Environment = "Production"
       # Ferramenta responsável pelo gerenciamento da infraestrutura como código

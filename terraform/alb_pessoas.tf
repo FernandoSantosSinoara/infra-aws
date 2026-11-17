@@ -1,5 +1,5 @@
 # ==============================================================================
-# APPLICATION LOAD BALANCER PARA AS APLICACOES DO NODE GROUP "ng-senac-app"
+# APPLICATION LOAD BALANCER PARA AS APLICACOES DO NODE GROUP "ng-best-buddy-app"
 # Listener 80 -> frontend estatico Nginx (NodePort 30080)
 # Listener 8081 -> pessoas-service
 # ==============================================================================
@@ -13,12 +13,12 @@ locals {
 
 # Security Group do ALB: aceita HTTP publico nas portas das aplicacoes
 resource "aws_security_group" "alb" {
-  name        = "alb-senac-app-sg"
-  description = "Permite acesso HTTP publico ao ALB das aplicacoes Senac"
+  name        = "alb-best-buddy-app-sg"
+  description = "Permite acesso HTTP publico ao ALB das aplicacoes Best Buddy"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name = "sg-alb-senac-app"
+    Name = "sg-alb-best-buddy-app"
   }
 }
 
@@ -81,20 +81,20 @@ resource "aws_vpc_security_group_ingress_rule" "nodes_from_alb_pessoas" {
 
 # Load Balancer publico nas subnets publicas
 resource "aws_lb" "app" {
-  name               = "alb-senac-app"
+  name               = "alb-best-buddy-app"
   load_balancer_type = "application"
   internal           = false
   security_groups    = [aws_security_group.alb.id]
   subnets            = module.vpc.public_subnets
 
   tags = {
-    Name = "alb-senac-app"
+    Name = "alb-best-buddy-app"
   }
 }
 
 # Target Group do frontend estatico servido pelo Nginx
 resource "aws_lb_target_group" "app" {
-  name        = "tg-senac-app"
+  name        = "tg-best-buddy-app"
   port        = var.app_node_port
   protocol    = "HTTP"
   target_type = "instance"
@@ -114,7 +114,7 @@ resource "aws_lb_target_group" "app" {
 
 # Target Group do pessoas-service
 resource "aws_lb_target_group" "pessoas" {
-  name        = "tg-senac-pessoas"
+  name        = "tg-best-buddy-pessoas"
   port        = local.pessoas_node_port
   protocol    = "HTTP"
   target_type = "instance"

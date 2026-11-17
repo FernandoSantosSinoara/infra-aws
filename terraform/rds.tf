@@ -4,19 +4,19 @@
 # Agrupa as subnets privadas da VPC onde o RDS pode ser colocado (mínimo 2 AZs)
 resource "aws_db_subnet_group" "mysql" {
   # Nome do subnet group no console da AWS
-  name = "db-subnet-senac-aws"
+  name = "db-subnet-best-buddy-aws"
   # Subnets privadas: o banco nunca recebe IP público
   subnet_ids = module.vpc.private_subnets
 
   tags = {
-    Name = "db-subnet-senac-aws"
+    Name = "db-subnet-best-buddy-aws"
   }
 }
 
 # Firewall do banco: libera a porta 3306 apenas para os nós do EKS
 resource "aws_security_group" "rds" {
   # Nome do security group
-  name = "rds-mysql-senac-sg"
+  name = "rds-mysql-best-buddy-sg"
   # Descrição do propósito
   description = "Permite acesso MySQL somente a partir dos nos do EKS"
   # VPC onde o security group será criado
@@ -32,7 +32,7 @@ resource "aws_security_group" "rds" {
   }
 
   tags = {
-    Name = "rds-mysql-senac-sg"
+    Name = "rds-mysql-best-buddy-sg"
   }
 }
 
