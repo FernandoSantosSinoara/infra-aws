@@ -2,7 +2,7 @@
 # PIPELINE CI/CD DO TERRAFORM VIA GITHUB ACTIONS
 # ==============================================================================
 # Define o nome amigável do fluxo de trabalho na interface do GitHub Actions
-name: "Terraform CI/CD - SENAC"
+name: "Terraform CI/CD - Best Buddy"
 
 # Bloco 'on': Determina quais eventos de gatilho disparam a execução desta pipeline
 on:

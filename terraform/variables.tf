@@ -16,7 +16,7 @@ variable "cluster_name" {
   # Tipo primitivo string
   type = string
   # Nome base do cluster Kubernetes
-  default = "cluster-app-senac-aws"
+  default = "cluster-app-best-buddy-aws"
   # Descrição informativa para os administradores de infraestrutura
   description = "Nome do Cluster Amazon EKS"
 }
@@ -38,7 +38,7 @@ variable "app_health_check_path" {
 # Identificador da instância RDS
 variable "db_identifier" {
   type        = string
-  default     = "mysql-senac-aws"
+  default     = "mysql-best-buddy-aws"
   description = "Identificador da instância RDS MySQL"
 }
 

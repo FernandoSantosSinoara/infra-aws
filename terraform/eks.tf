@@ -32,7 +32,7 @@ module "eks" {
     # Identificador do grupo de nós que rodarão as aplicações de negócio
     app_nodes = {
       # Nome do Node Group no console da AWS
-      name = "ng-senac-app"
+      name = "ng-best-buddy-app"
       # Família de instância EC2 balanceada (2 vCPUs e 2GB RAM - custo eficiente para estudos)
       instance_types = ["t3.small"]
 
@@ -53,7 +53,7 @@ module "eks" {
     # Entrada 1: Concede acesso total ao usuário de terminal local do instrutor/aluno
     admin_user = {
       # [id-conta] ARN do usuário IAM criado na conta AWS para gerenciamento via CLI local
-      principal_arn = "arn:aws:iam::188785237347:user/admin-cli"
+      principal_arn = "arn:aws:iam::306180879419:user/admin-cli"
       # Lista de políticas de acesso ao cluster atribuídas ao usuário
       policy_associations = {
         # Associação com a política de Super Administrador do Cluster
@@ -71,7 +71,7 @@ module "eks" {
     # Entrada 2: Concede acesso de Administrador para a Role do GitHub Actions rodar deploys
     github_actions = {
       # [id-conta] ARN da IAM Role assumida pelo runner do GitHub Actions via OIDC
-      principal_arn = "arn:aws:iam::188785237347:role/GitHubActions-Terraform-Role"
+      principal_arn = "arn:aws:iam::306180879419:role/GitHubActions-Terraform-Role"
       # Lista de políticas de acesso atribuídas ao pipeline de automação
       policy_associations = {
         # Associação com a política administrativa do cluster
